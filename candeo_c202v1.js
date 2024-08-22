@@ -5,7 +5,7 @@ const definition = {
                     { modelID: 'C202' } ],
     model: 'C202',
     vendor: 'Candeo',
-    description: 'Candeo C202 / C202N Zigbee rotary dimmer (with or without neutral)',
+    description: 'Candeo C202 & C202N Zigbee Rotary Dimmer',
     extend: [ light( {'configureReporting': true, 'powerOnBehavior': false } ) ],
     meta: {},
 };
