@@ -3,26 +3,74 @@ const tz = require('zigbee-herdsman-converters/converters/toZigbee');
 const exposes = require('zigbee-herdsman-converters/lib/exposes');
 const reporting = require('zigbee-herdsman-converters/lib/reporting');
 const e = exposes.presets;
+const ea = exposes.access;
+
+const manufacturerSpecificClusterCode = 0x1224;
+const switch_type_attribute = 0x8803;
+const data_type = 0x20;
+const value_map = {
+    0: 'momentary',
+    1: 'toggle'
+};
+const value_lookup = {
+    momentary: 0,
+    toggle: 1,
+};
+
+const candeo = {
+    fz:
+    {
+        switch_type: {
+            cluster: 'genBasic',
+            type: ['attributeReport', 'readResponse'],
+            convert: (model, msg, publish, options, meta) => {
+                if (Object.prototype.hasOwnProperty.call(msg.data, switch_type_attribute)) {
+                    const value = msg.data[switch_type_attribute];
+                    return {
+                        external_switch_type: value_map[value] || 'unknown',
+                        external_switch_type_numeric: value,
+                    };
+                }
+                return undefined;
+            },
+        }
+    },
+    tz:
+    {
+        switch_type: {
+            key: ['external_switch_type'],
+            convertSet: async (entity, key, value, meta) => {
+                const numericValue = value_lookup[value] ?? parseInt(value, 10);
+                await entity.write('genBasic', { [switch_type_attribute]: { value: numericValue, type: data_type } }, { manufacturerCode: manufacturerSpecificClusterCode });
+                return { state: { external_switch_type: value } };
+            },
+            convertGet: async (entity, key, meta) => {
+                await entity.read('genBasic', [switch_type_attribute], { manufacturerCode: manufacturerSpecificClusterCode });
+            },
+        },
+    },
+}
 
 const definition = {
-    fingerprint: [{modelID: 'C-ZB-SM205-2G'}],
+    fingerprint: [{modelID: 'C-ZB-SM205-2G', manufacturerName: 'Candeo'}],
     model: 'C-ZB-SM205-2G',
     vendor: 'Candeo',
     description: 'Candeo C-ZB-SM205-2G Zigbee 2 Gang Switch Module',
-    fromZigbee: [fz.on_off, fz.electrical_measurement, fz.metering, fz.power_on_behavior, fz.ignore_genOta],
-    toZigbee: [tz.on_off, tz.power_on_behavior],
+    fromZigbee: [fz.on_off, fz.electrical_measurement, fz.metering, fz.power_on_behavior, candeo.fz.switch_type, fz.ignore_genOta],
+    toZigbee: [tz.on_off, tz.power_on_behavior, candeo.tz.switch_type],
         exposes: [
             e.switch().withEndpoint('l1'),
             e.switch().withEndpoint('l2'),
-            e.power(),
-            e.current(),
-            e.voltage(),
-            e.energy(),
+            e.power().withEndpoint('e11'),
+            e.current().withEndpoint('e11'),
+            e.voltage().withEndpoint('e11'),
+            e.energy().withEndpoint('e11'),
             e.power_on_behavior(['off', 'on', 'previous']).withEndpoint('l1'),
-            e.power_on_behavior(['off', 'on', 'previous']).withEndpoint('l2')
+            e.power_on_behavior(['off', 'on', 'previous']).withEndpoint('l2'),
+            e.enum('external_switch_type', ea.ALL, ['momentary', 'toggle']).withLabel('External switch type').withEndpoint('e11')
         ],
         endpoint: (device) => {
-            return {'l1': 1, 'l2': 2};
+            return {'l1': 1, 'l2': 2, 'e11': 11};
         },
         meta: {multiEndpoint: true},
         configure: async (device, coordinatorEndpoint, logger) => {
@@ -50,6 +98,7 @@ const definition = {
             await endpoint11.read('haElectricalMeasurement', ['rmsCurrent']);
             await endpoint11.read('haElectricalMeasurement', ['rmsVoltage']);
             await endpoint11.read('seMetering', ['currentSummDelivered']);
+            await endpoint11.read('genBasic', [switch_type_attribute], { manufacturerCode: manufacturerSpecificClusterCode });
         },
 };
 
