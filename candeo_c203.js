@@ -53,7 +53,8 @@ const candeo = {
 
 const definition = {
     fingerprint: [
-        { modelID: 'C203', manufacturerName: 'Candeo', modelID: 'HK-LN-DIM-A', manufacturerName: 'Candeo' }
+        { modelID: 'C203', manufacturerName: 'Candeo' }, 
+        { modelID: 'HK-LN-DIM-A', manufacturerName: 'Candeo' }
     ],
     model: 'C203',
     vendor: 'Candeo',
