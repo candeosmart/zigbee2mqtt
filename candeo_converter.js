@@ -14,7 +14,7 @@ const definitions = [
         vendor: 'Candeo',
         description: 'Candeo C201 / C202 - local (v1)',
         extend: [light({ configureReporting: true, powerOnBehavior: false })],
-        ota: ota.zigbeeOTA,
+        ota: true,
         meta: {},
     },
     {
@@ -27,7 +27,7 @@ const definitions = [
         vendor: 'Candeo',
         description: 'Candeo C201 / C202 - local (v2)',
         extend: [light({ configureReporting: true, levelConfig: { disabledFeatures: ['on_transition_time', 'off_transition_time', 'on_off_transition_time', 'execute_if_off'] }, powerOnBehavior: true })],
-        ota: ota.zigbeeOTA,
+        ota: true,
         meta: {},
     },
 
@@ -41,7 +41,7 @@ const definitions = [
         vendor: 'Candeo',
         description: 'Candeo C201 Smart Dimmer Module',
         extend: [light({ configureReporting: true, levelConfig: { disabledFeatures: ['on_transition_time', 'off_transition_time', 'on_off_transition_time', 'execute_if_off'] }, powerOnBehavior: true })],
-        ota: ota.zigbeeOTA,
+        ota: true,
         meta: {},
     },
     {
@@ -52,7 +52,7 @@ const definitions = [
         vendor: 'Candeo',
         description: 'Candeo C202 Smart Rotary Dimmer',
         extend: [light({ configureReporting: true, levelConfig: { disabledFeatures: ['on_transition_time', 'off_transition_time', 'on_off_transition_time', 'execute_if_off'] }, powerOnBehavior: true })],
-        ota: ota.zigbeeOTA,
+        ota: true,
         meta: {},
     }
 
